@@ -1,5 +1,6 @@
 //jshint esversion:6
 
+//importing dependencies
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose=require("mongoose");
@@ -12,8 +13,10 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
+//connecting mongodb server using mongoose
 mongoose.connect("mongodb+srv://chinmayee7697:17559988@cluster0.mhyik5j.mongodb.net/todolistDB", {useNewUrlParser:true});
 
+//Creating collection - Item (in dbs - items )
 const itemsSchema=new mongoose.Schema({
   name:String
 });
@@ -34,6 +37,7 @@ const item3=new Item({
 
 const defaultItems=[item1, item2, item3];
   
+//Creating another collection - List (in dbs - lists)
 const listSchema=new mongoose.Schema({
   name:String,
   items:[itemsSchema]
@@ -115,9 +119,6 @@ app.post("/", function(req, res){
         res.redirect("/" + listName);
       })
   }
-
-
-
   
 });
 
@@ -128,18 +129,19 @@ app.post("/delete", function(req,res){
 
   if(listName === "Today"){
     Item.findByIdAndRemove(checkedItemId)
-    .then((removedItem) => {
-      if (removedItem) {
-        console.log("Successfully deleted checked item");
-      } else {
-        console.log("Item not found or already deleted");
-      }
-      res.redirect("/");
-    })
-    .catch((error) => {
-      console.error("Error deleting item:", error);
-    });  
-  } else{
+      .then((removedItem) => {
+          if (removedItem) {
+            console.log("Successfully deleted checked item");
+          } else {
+            console.log("Item not found or already deleted");
+          }
+        res.redirect("/");
+      })
+      .catch((error) => {
+        console.error("Error deleting item:", error);
+       });  
+  } 
+  else{
       List.findOneAndUpdate({name: listName} , {$pull:{items: {_id:checkedItemId}}} )
         .then((foundList)=>{
           res.redirect("/"+ listName);
